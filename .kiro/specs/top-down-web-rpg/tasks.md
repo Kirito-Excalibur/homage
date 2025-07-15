@@ -8,7 +8,7 @@
   - Configure build system (Vite/Webpack) for development and production
   - _Requirements: 1.1, 7.2_
 
-- [ ] 2. Create placeholder visual assets for development
+- [x] 2. Create placeholder visual assets for development
 
   - Generate simple colored rectangle sprites for character (32x32px)
   - Create basic tile sprites for world environment (32x32px grass, stone, water)
@@ -16,7 +16,7 @@
   - Create placeholder sprites for items and interactive objects
   - _Requirements: 2.1, 7.1_
 
-- [ ] 3. Implement core game scenes and scene management
+- [x] 3. Implement core game scenes and scene management
 
   - Create MainMenuScene with "Start New Adventure" functionality using placeholder UI
   - Implement basic GameWorldScene with simple tile-based world rendering
