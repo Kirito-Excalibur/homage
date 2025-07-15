@@ -1,0 +1,22 @@
+{
+  "name": "top-down-web-rpg",
+  "version": "1.0.0",
+  "description": "A story-focused top-down web RPG built with Phaser 3",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite preview"
+  },
+  "keywords": ["phaser", "rpg", "game", "web", "story"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.70.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
