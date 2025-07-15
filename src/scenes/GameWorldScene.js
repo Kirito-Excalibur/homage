@@ -1,9 +1,12 @@
+import Character from '../entities/Character.js';
+
 export default class GameWorldScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameWorldScene' });
         this.tileSize = 32;
         this.worldWidth = 25;
         this.worldHeight = 19;
+        this.worldData = null;
     }
 
     preload() {
@@ -78,7 +81,7 @@ export default class GameWorldScene extends Phaser.Scene {
 
     createWorld() {
         // Create a simple world layout
-        const worldData = this.generateWorldData();
+        this.worldData = this.generateWorldData();
         
         // Create tile group for better performance
         this.worldTiles = this.add.group();
@@ -86,7 +89,7 @@ export default class GameWorldScene extends Phaser.Scene {
         // Render the world tiles
         for (let y = 0; y < this.worldHeight; y++) {
             for (let x = 0; x < this.worldWidth; x++) {
-                const tileType = worldData[y][x];
+                const tileType = this.worldData[y][x];
                 const tileX = x * this.tileSize;
                 const tileY = y * this.tileSize;
                 
@@ -149,20 +152,16 @@ export default class GameWorldScene extends Phaser.Scene {
         const startX = Math.floor(this.worldWidth / 2) * this.tileSize;
         const startY = Math.floor(this.worldHeight / 2) * this.tileSize;
         
-        this.player = this.add.image(startX, startY, 'player-sprite');
-        this.player.setOrigin(0, 0);
-        
-        // Store player's grid position
-        this.playerGridX = Math.floor(this.worldWidth / 2);
-        this.playerGridY = Math.floor(this.worldHeight / 2);
+        // Create character using the new Character class
+        this.player = new Character(this, startX, startY);
     }
 
     setupCamera() {
         // Set world bounds
         this.cameras.main.setBounds(0, 0, this.worldWidth * this.tileSize, this.worldHeight * this.tileSize);
         
-        // Make camera follow player
-        this.cameras.main.startFollow(this.player);
+        // Make camera follow player sprite
+        this.cameras.main.startFollow(this.player.sprite);
         this.cameras.main.setZoom(1);
     }
 
@@ -200,9 +199,10 @@ export default class GameWorldScene extends Phaser.Scene {
         this.uiContainer.add(instructions);
     }
 
-    update() {
-        // Handle input
+    update(time, delta) {
+        // Update character with new input system
         this.handleInput();
+        this.player.update(time, delta);
         
         // Handle ESC key to return to menu
         if (Phaser.Input.Keyboard.JustDown(this.escKey)) {
@@ -211,25 +211,29 @@ export default class GameWorldScene extends Phaser.Scene {
     }
 
     handleInput() {
-        // Simple movement - will be enhanced in later tasks
-        const speed = 2;
-        
-        if (this.cursors.left.isDown || this.wasd.A.isDown) {
-            this.player.x -= speed;
+        // Update character input state based on keyboard input
+        this.player.setInputState('left', this.cursors.left.isDown || this.wasd.A.isDown);
+        this.player.setInputState('right', this.cursors.right.isDown || this.wasd.D.isDown);
+        this.player.setInputState('up', this.cursors.up.isDown || this.wasd.W.isDown);
+        this.player.setInputState('down', this.cursors.down.isDown || this.wasd.S.isDown);
+    }
+
+    // Methods for Character class collision detection
+    getWorldBounds() {
+        return {
+            width: this.worldWidth * this.tileSize,
+            height: this.worldHeight * this.tileSize
+        };
+    }
+
+    isCollisionTile(gridX, gridY) {
+        // Check if coordinates are within world bounds
+        if (gridX < 0 || gridX >= this.worldWidth || gridY < 0 || gridY >= this.worldHeight) {
+            return true; // Out of bounds is considered collision
         }
-        else if (this.cursors.right.isDown || this.wasd.D.isDown) {
-            this.player.x += speed;
-        }
-        
-        if (this.cursors.up.isDown || this.wasd.W.isDown) {
-            this.player.y -= speed;
-        }
-        else if (this.cursors.down.isDown || this.wasd.S.isDown) {
-            this.player.y += speed;
-        }
-        
-        // Keep player within world bounds
-        this.player.x = Phaser.Math.Clamp(this.player.x, 0, (this.worldWidth - 1) * this.tileSize);
-        this.player.y = Phaser.Math.Clamp(this.player.y, 0, (this.worldHeight - 1) * this.tileSize);
+
+        // Check if the tile type is collidable
+        const tileType = this.worldData[gridY][gridX];
+        return tileType === 'stone' || tileType === 'water' || tileType === 'tree';
     }
 }

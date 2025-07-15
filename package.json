@@ -10,7 +10,13 @@
     "preview": "vite preview",
     "serve": "vite preview"
   },
-  "keywords": ["phaser", "rpg", "game", "web", "story"],
+  "keywords": [
+    "phaser",
+    "rpg",
+    "game",
+    "web",
+    "story"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {

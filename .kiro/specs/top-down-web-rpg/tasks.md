@@ -24,7 +24,7 @@
   - Add basic scene lifecycle management (preload, create, update)
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 4. Create character controller and basic movement
+- [x] 4. Create character controller and basic movement
 
   - Implement Character class with placeholder sprite loading and positioning
   - Add WASD/arrow key movement controls using Phaser input system
