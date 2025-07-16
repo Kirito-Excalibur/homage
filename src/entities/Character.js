@@ -9,7 +9,7 @@ export default class Character {
         this.initializeAudio();
         
         // Create the character sprite using the new animation system
-        this.sprite = this.scene.add.sprite(x, y, `${characterType}-idle`);
+        this.sprite = this.scene.add.sprite(x, y, `${characterType}-idle-0`);
         this.sprite.setOrigin(0, 0);
         
         // Set initial depth based on Y position for proper layering

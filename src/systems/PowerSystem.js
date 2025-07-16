@@ -3,7 +3,7 @@
  * Handles power unlocking, activation, cooldowns, and visual feedback
  */
 export default class PowerSystem {
-    constructor(scene) {
+    constructor(scene = null) {
         this.scene = scene;
         this.powers = new Map();
         this.unlockedPowers = new Set();
@@ -94,7 +94,7 @@ export default class PowerSystem {
      * Set up keyboard controls for power activation
      */
     setupPowerControls() {
-        if (!this.scene || !this.scene.input) return;
+        if (!this.scene || !this.scene.input || !this.scene.input.keyboard) return;
 
         this.powerKeys = {};
         
@@ -348,7 +348,7 @@ export default class PowerSystem {
      * Apply telekinesis effect
      */
     applyTelekinesisEffect(effect, power, context) {
-        if (!this.scene.player) return;
+        if (!this.scene || !this.scene.player || !this.scene.add || !this.scene.tweens) return;
 
         const playerPos = this.scene.player.getPosition();
         const range = power.range || 64;
@@ -380,6 +380,8 @@ export default class PowerSystem {
      * Apply enhanced vision effect
      */
     applyVisionEffect(effect, power, context) {
+        if (!this.scene || !this.scene.add || !this.scene.cameras || !this.scene.cameras.main) return;
+
         // Create vision overlay
         this.visionOverlay = this.scene.add.rectangle(
             this.scene.cameras.main.centerX,
@@ -410,6 +412,8 @@ export default class PowerSystem {
      * Apply time manipulation effect
      */
     applyTimeEffect(effect, power, context) {
+        if (!this.scene) return;
+
         if (this.scene.physics && this.scene.physics.world) {
             // Slow down physics
             this.originalTimeScale = this.scene.physics.world.timeScale;
@@ -417,16 +421,18 @@ export default class PowerSystem {
         }
 
         // Create time distortion visual effect
-        this.timeDistortionEffect = this.scene.add.rectangle(
-            this.scene.cameras.main.centerX,
-            this.scene.cameras.main.centerY,
-            this.scene.cameras.main.width,
-            this.scene.cameras.main.height,
-            0xffffff,
-            0.05
-        );
-        this.timeDistortionEffect.setScrollFactor(0);
-        this.timeDistortionEffect.setDepth(600);
+        if (this.scene.add && this.scene.cameras && this.scene.cameras.main) {
+            this.timeDistortionEffect = this.scene.add.rectangle(
+                this.scene.cameras.main.centerX,
+                this.scene.cameras.main.centerY,
+                this.scene.cameras.main.width,
+                this.scene.cameras.main.height,
+                0xffffff,
+                0.05
+            );
+            this.timeDistortionEffect.setScrollFactor(0);
+            this.timeDistortionEffect.setDepth(600);
+        }
 
         console.log('Time manipulation effect applied');
     }
@@ -435,7 +441,7 @@ export default class PowerSystem {
      * Remove time manipulation effect
      */
     removeTimeEffect(effect, power, context) {
-        if (this.scene.physics && this.scene.physics.world && this.originalTimeScale !== undefined) {
+        if (this.scene && this.scene.physics && this.scene.physics.world && this.originalTimeScale !== undefined) {
             this.scene.physics.world.timeScale = this.originalTimeScale;
         }
 
@@ -451,14 +457,14 @@ export default class PowerSystem {
      * Apply phase walk effect
      */
     applyPhaseEffect(effect, power, context) {
-        if (this.scene.player && this.scene.player.sprite) {
-            // Make player semi-transparent and able to phase through obstacles
-            this.scene.player.sprite.setAlpha(0.5);
-            this.scene.player.sprite.setTint(0x00ffff);
-            
-            // Set phase flag for collision detection
-            this.scene.player.isPhasing = true;
-        }
+        if (!this.scene || !this.scene.player || !this.scene.player.sprite) return;
+
+        // Make player semi-transparent and able to phase through obstacles
+        this.scene.player.sprite.setAlpha(0.5);
+        this.scene.player.sprite.setTint(0x00ffff);
+        
+        // Set phase flag for collision detection
+        this.scene.player.isPhasing = true;
 
         console.log('Phase walk effect applied');
     }
@@ -467,7 +473,7 @@ export default class PowerSystem {
      * Remove phase walk effect
      */
     removePhaseEffect(effect, power, context) {
-        if (this.scene.player && this.scene.player.sprite) {
+        if (this.scene && this.scene.player && this.scene.player.sprite) {
             this.scene.player.sprite.setAlpha(1);
             this.scene.player.sprite.clearTint();
             this.scene.player.isPhasing = false;

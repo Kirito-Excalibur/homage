@@ -3,7 +3,7 @@
  * Handles story data loading, event triggering, progress tracking, and flag management
  */
 export default class StorySystem {
-    constructor(scene) {
+    constructor(scene = null) {
         this.scene = scene;
         this.storyData = null;
         this.currentCheckpoint = 'game_start';

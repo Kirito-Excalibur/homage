@@ -2,7 +2,7 @@
  * InventorySystem - Manages player inventory, item collection, and usage
  */
 export default class InventorySystem {
-    constructor(scene) {
+    constructor(scene = null) {
         this.scene = scene;
         this.items = [];
         this.maxCapacity = 20;

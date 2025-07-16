@@ -3,7 +3,7 @@
  * Handles automatic saving at story checkpoints, manual saves, and load functionality
  */
 export default class SaveSystem {
-    constructor(scene) {
+    constructor(scene = null) {
         this.scene = scene;
         this.gameManager = null;
         this.autoSaveEnabled = true;
@@ -18,6 +18,12 @@ export default class SaveSystem {
      * Initialize the save system
      */
     initializeSaveSystem() {
+        // Skip initialization if no scene is available yet
+        if (!this.scene || !this.scene.plugins) {
+            console.log('SaveSystem: Scene not available, deferring initialization');
+            return;
+        }
+
         // Get GameManager reference
         this.gameManager = this.scene.plugins.get('GameManager');
         

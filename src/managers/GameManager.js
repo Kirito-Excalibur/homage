@@ -53,22 +53,23 @@ export default class GameManager extends Phaser.Plugins.BasePlugin {
      * Initialize game systems
      */
     initializeSystems() {
-        const gameWorldScene = this.game.scene.getScene('GameWorldScene');
+        // Initialize systems without requiring a specific scene initially
+        // They will be properly connected when scenes become available
         
         // Initialize AudioManager first (other systems may need it)
-        this.audioManager = new AudioManager(gameWorldScene);
+        this.audioManager = new AudioManager(null);
         
         // Initialize StorySystem
-        this.storySystem = new StorySystem(gameWorldScene);
+        this.storySystem = new StorySystem(null);
         
         // Initialize PowerSystem
-        this.powerSystem = new PowerSystem(gameWorldScene);
+        this.powerSystem = new PowerSystem(null);
         
         // Initialize InventorySystem
-        this.inventorySystem = new InventorySystem(gameWorldScene);
+        this.inventorySystem = new InventorySystem(null);
         
         // Initialize SaveSystem
-        this.saveSystem = new SaveSystem(gameWorldScene);
+        this.saveSystem = new SaveSystem(null);
         
         // Set up integration between systems
         this.setupSystemIntegration();
@@ -78,6 +79,45 @@ export default class GameManager extends Phaser.Plugins.BasePlugin {
         
         this.gameState.initialized = true;
         console.log('Game systems initialized');
+    }
+
+    /**
+     * Connect systems to a scene when it becomes available
+     * @param {Phaser.Scene} scene - Scene to connect systems to
+     */
+    connectSystemsToScene(scene) {
+        if (!scene) return;
+
+        console.log(`Connecting systems to scene: ${scene.scene.key}`);
+
+        // Connect AudioManager to scene
+        if (this.audioManager && !this.audioManager.scene) {
+            this.audioManager.scene = scene;
+            this.audioManager.game = scene.game;
+            // Re-initialize audio context now that we have a scene
+            this.audioManager.initializeAudioContext();
+        }
+
+        // Connect other systems to scene
+        if (this.storySystem && !this.storySystem.scene) {
+            this.storySystem.scene = scene;
+        }
+
+        if (this.powerSystem && !this.powerSystem.scene) {
+            this.powerSystem.scene = scene;
+        }
+
+        if (this.inventorySystem && !this.inventorySystem.scene) {
+            this.inventorySystem.scene = scene;
+        }
+
+        if (this.saveSystem && !this.saveSystem.scene) {
+            this.saveSystem.scene = scene;
+            // Re-initialize save system now that we have a scene
+            this.saveSystem.initializeSaveSystem();
+        }
+
+        console.log('Systems connected to scene successfully');
     }
 
     /**

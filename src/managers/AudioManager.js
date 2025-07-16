@@ -3,9 +3,9 @@
  * Handles audio loading, caching, volume management, and scene transitions
  */
 export default class AudioManager {
-    constructor(scene) {
+    constructor(scene = null) {
         this.scene = scene;
-        this.game = scene.game;
+        this.game = scene ? scene.game : null;
         
         // Audio state
         this.backgroundMusic = null;
@@ -55,17 +55,36 @@ export default class AudioManager {
         // Handle browser audio policy requirements
         this.audioUnlocked = false;
         
+        // Skip if no scene available yet
+        if (!this.scene) {
+            console.log('AudioManager: Scene not available, deferring audio context initialization');
+            return;
+        }
+        
         // Listen for first user interaction to unlock audio
         const unlockAudio = () => {
-            if (!this.audioUnlocked) {
-                // Create a silent sound to unlock audio context
-                const silentSound = this.scene.sound.add('__silent__', { volume: 0 });
-                if (silentSound) {
-                    silentSound.play();
-                    silentSound.destroy();
+            if (!this.audioUnlocked && this.scene && this.scene.sound) {
+                try {
+                    // Try to unlock audio context by resuming it
+                    if (this.scene.sound.context && this.scene.sound.context.state === 'suspended') {
+                        this.scene.sound.context.resume().then(() => {
+                            this.audioUnlocked = true;
+                            console.log('Audio context unlocked');
+                        }).catch(() => {
+                            // Fallback: just mark as unlocked
+                            this.audioUnlocked = true;
+                            console.log('Audio context unlock attempted');
+                        });
+                    } else {
+                        // Audio context is already running or not available
+                        this.audioUnlocked = true;
+                        console.log('Audio context already unlocked or not available');
+                    }
+                } catch (error) {
+                    // Fallback: just mark as unlocked
+                    this.audioUnlocked = true;
+                    console.log('Audio context unlock fallback');
                 }
-                this.audioUnlocked = true;
-                console.log('Audio context unlocked');
                 
                 // Remove event listeners
                 document.removeEventListener('click', unlockAudio);
@@ -155,6 +174,12 @@ export default class AudioManager {
      */
     async loadAudioAsset(key, assetData) {
         return new Promise((resolve, reject) => {
+            // Check if scene is available
+            if (!this.scene || !this.scene.sound || !this.scene.load) {
+                reject(new Error('Scene not available for audio loading'));
+                return;
+            }
+            
             // Check if already loaded
             if (this.scene.sound.get(key)) {
                 resolve();
@@ -239,6 +264,12 @@ export default class AudioManager {
      */
     startNewMusic(musicKey, config) {
         try {
+            // Check if scene is available
+            if (!this.scene || !this.scene.sound || !this.scene.tweens) {
+                console.warn('Scene not available for music playback');
+                return;
+            }
+            
             // Check if audio asset exists
             if (!this.scene.sound.get(musicKey)) {
                 console.warn(`Music asset not found: ${musicKey}`);
@@ -276,6 +307,17 @@ export default class AudioManager {
             return;
         }
         
+        // Check if scene is available for tweens
+        if (!this.scene || !this.scene.tweens) {
+            // Fallback: stop immediately without fade
+            this.backgroundMusic.stop();
+            this.backgroundMusic.destroy();
+            this.backgroundMusic = null;
+            this.currentMusicKey = null;
+            if (onComplete) onComplete();
+            return;
+        }
+        
         this.scene.tweens.add({
             targets: this.backgroundMusic,
             volume: 0,
@@ -303,6 +345,12 @@ export default class AudioManager {
         if (!sfxKey || this.isMuted) return null;
         
         try {
+            // Check if scene is available
+            if (!this.scene || !this.scene.sound) {
+                console.warn('Scene not available for SFX playback');
+                return null;
+            }
+            
             // Check if audio asset exists
             if (!this.scene.sound.get(sfxKey)) {
                 console.warn(`SFX asset not found: ${sfxKey}`);
@@ -542,7 +590,7 @@ export default class AudioManager {
         
         // Background panel
         const bg = scene.add.rectangle(0, 0, 200, 120, 0x2c3e50, 0.9);
-        bg.setStroke(0x34495e, 2);
+        bg.setStrokeStyle(2, 0x34495e);
         
         // Title
         const title = scene.add.text(0, -45, 'Audio Controls', {
