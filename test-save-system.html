@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background-color: #34495e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success {
+            color: #27ae60;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        .info {
+            color: #f39c12;
+        }
+        #output {
+            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Save System Test</h1>
+        
+        <div class="test-section">
+            <h2>Save System Tests</h2>
+            <button onclick="testLocalStorage()">Test LocalStorage</button>
+            <button onclick="testSaveData()">Test Save Data Creation</button>
+            <button onclick="testSaveLoad()">Test Save/Load Cycle</button>
+            <button onclick="testErrorHandling()">Test Error Handling</button>
+            <button onclick="clearOutput()">Clear Output</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Storage Management</h2>
+            <button onclick="viewSaves()">View Saves</button>
+            <button onclick="clearSaves()">Clear All Saves</button>
+            <button onclick="checkStorageUsage()">Check Storage Usage</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Output</h2>
+            <div id="output"></div>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        function testLocalStorage() {
+            log('Testing LocalStorage availability...', 'info');
+            
+            try {
+                if (typeof(Storage) !== "undefined") {
+                    // Test write
+                    localStorage.setItem('test_key', 'test_value');
+                    
+                    // Test read
+                    const value = localStorage.getItem('test_key');
+                    
+                    if (value === 'test_value') {
+                        log('✓ LocalStorage is working correctly', 'success');
+                    } else {
+                        log('✗ LocalStorage read/write mismatch', 'error');
+                    }
+                    
+                    // Cleanup
+                    localStorage.removeItem('test_key');
+                } else {
+                    log('✗ LocalStorage is not supported', 'error');
+                }
+            } catch (error) {
+                log(`✗ LocalStorage error: ${error.message}`, 'error');
+            }
+        }
+
+        function testSaveData() {
+            log('Testing save data structure...', 'info');
+            
+            const mockSaveData = {
+                version: '1.0.0',
+                timestamp: Date.now(),
+                gameState: {
+                    story: {
+                        currentCheckpoint: 'test_checkpoint',
+                        completedEvents: ['event1', 'event2'],
+                        storyFlags: { flag1: true, flag2: false },
+                        unlockedPowers: ['power1']
+                    },
+                    powers: {
+                        unlockedPowers: ['power1'],
+                        activePowers: []
+                    },
+                    inventory: {
+                        items: [{ id: 'item1', name: 'Test Item' }],
+                        maxCapacity: 10
+                    },
+                    player: {
+                        position: { x: 400, y: 300 },
+                        health: 100,
+                        facingDirection: 'down'
+                    },
+                    world: {
+                        currentMap: 'main_world',
+                        visitedAreas: ['starting_area']
+                    }
+                },
+                metadata: {
+                    playTime: 60000,
+                    saveCount: 1,
+                    lastCheckpoint: 'test_checkpoint'
+                }
+            };
+
+            try {
+                const serialized = JSON.stringify(mockSaveData);
+                const deserialized = JSON.parse(serialized);
+                
+                if (deserialized.version === mockSaveData.version) {
+                    log('✓ Save data serialization/deserialization works', 'success');
+                    log(`Save data size: ${new Blob([serialized]).size} bytes`, 'info');
+                } else {
+                    log('✗ Save data corruption detected', 'error');
+                }
+            } catch (error) {
+                log(`✗ Save data error: ${error.message}`, 'error');
+            }
+        }
+
+        function testSaveLoad() {
+            log('Testing save/load cycle...', 'info');
+            
+            const testData = {
+                version: '1.0.0',
+                timestamp: Date.now(),
+                gameState: { test: 'data' },
+                metadata: { saveCount: 1 }
+            };
+
+            try {
+                // Save
+                localStorage.setItem('rpg_test_save', JSON.stringify(testData));
+                log('✓ Test data saved', 'success');
+                
+                // Load
+                const loadedData = localStorage.getItem('rpg_test_save');
+                if (loadedData) {
+                    const parsed = JSON.parse(loadedData);
+                    if (parsed.gameState.test === 'data') {
+                        log('✓ Test data loaded correctly', 'success');
+                    } else {
+                        log('✗ Loaded data does not match saved data', 'error');
+                    }
+                } else {
+                    log('✗ Failed to load test data', 'error');
+                }
+                
+                // Cleanup
+                localStorage.removeItem('rpg_test_save');
+            } catch (error) {
+                log(`✗ Save/load error: ${error.message}`, 'error');
+            }
+        }
+
+        function testErrorHandling() {
+            log('Testing error handling...', 'info');
+            
+            // Test corrupted save data
+            try {
+                localStorage.setItem('rpg_corrupted_test', 'invalid json data');
+                
+                const corruptedData = localStorage.getItem('rpg_corrupted_test');
+                try {
+                    JSON.parse(corruptedData);
+                    log('✗ Corrupted data was not detected', 'error');
+                } catch (parseError) {
+                    log('✓ Corrupted data properly detected', 'success');
+                }
+                
+                localStorage.removeItem('rpg_corrupted_test');
+            } catch (error) {
+                log(`Error in corruption test: ${error.message}`, 'error');
+            }
+            
+            // Test storage quota (simulate)
+            log('Storage quota handling would be tested in real usage scenarios', 'info');
+        }
+
+        function viewSaves() {
+            log('Viewing all RPG saves...', 'info');
+            
+            let saveCount = 0;
+            for (let key in localStorage) {
+                if (key.startsWith('rpg_')) {
+                    try {
+                        const data = JSON.parse(localStorage[key]);
+                        log(`${key}: ${new Date(data.timestamp).toLocaleString()}`, 'info');
+                        saveCount++;
+                    } catch (error) {
+                        log(`${key}: [CORRUPTED]`, 'error');
+                        saveCount++;
+                    }
+                }
+            }
+            
+            if (saveCount === 0) {
+                log('No RPG saves found', 'info');
+            } else {
+                log(`Found ${saveCount} save files`, 'success');
+            }
+        }
+
+        function clearSaves() {
+            log('Clearing all RPG saves...', 'info');
+            
+            const keysToRemove = [];
+            for (let key in localStorage) {
+                if (key.startsWith('rpg_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            
+            keysToRemove.forEach(key => {
+                localStorage.removeItem(key);
+            });
+            
+            log(`Cleared ${keysToRemove.length} save files`, 'success');
+        }
+
+        function checkStorageUsage() {
+            log('Checking storage usage...', 'info');
+            
+            let totalSize = 0;
+            let rpgSize = 0;
+            
+            for (let key in localStorage) {
+                const size = localStorage[key].length;
+                totalSize += size;
+                
+                if (key.startsWith('rpg_')) {
+                    rpgSize += size;
+                }
+            }
+            
+            log(`Total localStorage usage: ${totalSize} characters`, 'info');
+            log(`RPG game usage: ${rpgSize} characters`, 'info');
+            log(`Estimated available space: ~${5 * 1024 * 1024 - totalSize} characters`, 'info');
+        }
+
+        // Initialize
+        log('Save System Test Page Loaded', 'success');
+        log('Click buttons above to run tests', 'info');
+    </script>
+</body>
+</html>

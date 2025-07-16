@@ -1,11 +1,19 @@
 export default class Character {
-    constructor(scene, x, y) {
+    constructor(scene, x, y, characterType = 'player') {
         this.scene = scene;
         this.tileSize = 32;
+        this.characterType = characterType;
         
-        // Create the character sprite
-        this.sprite = this.scene.add.sprite(x, y, 'player-sprite');
+        // Audio integration
+        this.audioManager = null;
+        this.initializeAudio();
+        
+        // Create the character sprite using the new animation system
+        this.sprite = this.scene.add.sprite(x, y, `${characterType}-idle`);
         this.sprite.setOrigin(0, 0);
+        
+        // Set initial depth based on Y position for proper layering
+        this.updateDepth();
         
         // Movement properties
         this.speed = 120; // pixels per second
@@ -13,9 +21,10 @@ export default class Character {
         this.facingDirection = 'down';
         
         // Animation properties
-        this.animationTint = 0xffffff;
+        this.currentAnimation = 'idle';
         this.animationTimer = 0;
-        this.animationDuration = 200; // milliseconds
+        this.animationDuration = 300; // milliseconds per frame
+        this.currentFrame = 0;
         
         // Store grid position for collision checking
         this.gridX = Math.floor(x / this.tileSize);
@@ -28,25 +37,81 @@ export default class Character {
             left: false,
             right: false
         };
+        
+        // Audio properties for movement sounds
+        this.lastFootstepTime = 0;
+        this.footstepInterval = 400; // milliseconds between footstep sounds
+        
+        // Create animations for this character
+        this.createAnimations();
     }
 
-    createPlaceholderSprite() {
-        // Create simple character sprite (blue square with white center)
-        const charGraphics = this.scene.add.graphics();
-        charGraphics.fillStyle(0x3498db);
-        charGraphics.fillRect(0, 0, this.tileSize, this.tileSize);
-        charGraphics.fillStyle(0xffffff);
-        charGraphics.fillCircle(this.tileSize/2, this.tileSize/2, 8);
-        charGraphics.generateTexture('player-sprite', this.tileSize, this.tileSize);
-        charGraphics.destroy();
+    /**
+     * Initialize audio integration
+     */
+    initializeAudio() {
+        const gameManager = this.scene.plugins.get('GameManager');
+        if (gameManager && gameManager.getAudioManager()) {
+            this.audioManager = gameManager.getAudioManager();
+        }
+    }
+
+    createAnimations() {
+        // Create animation configurations for this character type
+        const animKey = this.characterType;
+        
+        // Create idle animation
+        if (!this.scene.anims.exists(`${animKey}-idle`)) {
+            this.scene.anims.create({
+                key: `${animKey}-idle`,
+                frames: [
+                    { key: `${animKey}-idle-0` },
+                    { key: `${animKey}-idle-1` }
+                ],
+                frameRate: 2,
+                repeat: -1
+            });
+        }
+        
+        // Create walk animation
+        if (!this.scene.anims.exists(`${animKey}-walk`)) {
+            this.scene.anims.create({
+                key: `${animKey}-walk`,
+                frames: [
+                    { key: `${animKey}-walk-0` },
+                    { key: `${animKey}-walk-1` },
+                    { key: `${animKey}-walk-2` },
+                    { key: `${animKey}-walk-3` }
+                ],
+                frameRate: 8,
+                repeat: -1
+            });
+        }
+        
+        // Start with idle animation
+        this.playAnimation('idle');
+    }
+    
+    playAnimation(animationType) {
+        const animKey = `${this.characterType}-${animationType}`;
+        
+        if (this.currentAnimation !== animationType) {
+            this.currentAnimation = animationType;
+            
+            if (this.scene.anims.exists(animKey)) {
+                this.sprite.play(animKey);
+            } else {
+                console.warn(`Animation ${animKey} does not exist`);
+            }
+        }
     }
 
     update(time, delta) {
-        this.handleMovement(delta);
+        this.handleMovement(time, delta);
         this.updateAnimation(time, delta);
     }
 
-    handleMovement(delta) {
+    handleMovement(time, delta) {
         let velocityX = 0;
         let velocityY = 0;
         let newFacingDirection = this.facingDirection;
@@ -74,10 +139,13 @@ export default class Character {
             velocityY *= 0.707;
         }
 
-        // Update facing direction
+        // Update facing direction and handle movement audio
         if (velocityX !== 0 || velocityY !== 0) {
             this.facingDirection = newFacingDirection;
             this.isMoving = true;
+            
+            // Play footstep sounds at intervals while moving
+            this.handleMovementAudio(time);
         } else {
             this.isMoving = false;
         }
@@ -98,6 +166,8 @@ export default class Character {
         if (!collision.y) {
             this.sprite.y = newY;
             this.gridY = Math.floor(this.sprite.y / this.tileSize);
+            // Update depth when Y position changes for proper layering
+            this.updateDepth();
         }
     }
 
@@ -131,22 +201,11 @@ export default class Character {
     }
 
     updateAnimation(time, delta) {
+        // Switch between idle and walk animations based on movement
         if (this.isMoving) {
-            // Simple animation using tint changes
-            this.animationTimer += delta;
-            
-            if (this.animationTimer >= this.animationDuration) {
-                this.animationTimer = 0;
-                
-                // Cycle through different tints to simulate movement
-                const tints = [0xffffff, 0xe8f4f8, 0xd1e9f2, 0xe8f4f8];
-                const currentTintIndex = Math.floor(time / this.animationDuration) % tints.length;
-                this.sprite.setTint(tints[currentTintIndex]);
-            }
+            this.playAnimation('walk');
         } else {
-            // Reset to normal tint when not moving
-            this.sprite.setTint(0xffffff);
-            this.animationTimer = 0;
+            this.playAnimation('idle');
         }
 
         // Add subtle directional visual feedback
@@ -171,6 +230,26 @@ export default class Character {
                 break;
             default:
                 this.sprite.setScale(1, 1);
+        }
+    }
+
+    updateDepth() {
+        // Set depth based on Y position for proper layering with world objects
+        // Objects lower on screen (higher Y values) should appear in front
+        this.sprite.setDepth(this.sprite.y + this.tileSize);
+    }
+
+    /**
+     * Handle movement audio (footstep sounds)
+     * @param {number} time - Current game time
+     */
+    handleMovementAudio(time) {
+        if (!this.audioManager || !this.isMoving) return;
+        
+        // Play footstep sound at intervals while moving
+        if (time - this.lastFootstepTime > this.footstepInterval) {
+            this.audioManager.playCharacterActionSfx('walk');
+            this.lastFootstepTime = time;
         }
     }
 
@@ -205,10 +284,61 @@ export default class Character {
         return this.isMoving;
     }
 
-    // Method for future power system integration
-    usePower(powerId) {
-        // Placeholder for power usage - will be implemented in later tasks
-        console.log(`Character attempting to use power: ${powerId}`);
+    /**
+     * Use a power through the power system
+     * @param {string} powerId - ID of the power to use
+     * @param {Object} context - Additional context for power usage
+     * @returns {boolean} - Whether power was successfully used
+     */
+    usePower(powerId, context = {}) {
+        // Get power system from GameManager
+        const gameManager = this.scene.plugins.get('GameManager');
+        if (!gameManager || !gameManager.getPowerSystem()) {
+            console.warn('Power system not available');
+            return false;
+        }
+
+        const powerSystem = gameManager.getPowerSystem();
+        
+        // Add character context to power usage
+        const powerContext = {
+            ...context,
+            character: this,
+            position: this.getPosition(),
+            gridPosition: this.getGridPosition(),
+            facingDirection: this.facingDirection
+        };
+
+        return powerSystem.activatePower(powerId, powerContext);
+    }
+
+    /**
+     * Check if character can use a specific power
+     * @param {string} powerId - ID of the power to check
+     * @returns {boolean} - Whether power can be used
+     */
+    canUsePower(powerId) {
+        const gameManager = this.scene.plugins.get('GameManager');
+        if (!gameManager || !gameManager.getPowerSystem()) {
+            return false;
+        }
+
+        const powerSystem = gameManager.getPowerSystem();
+        return powerSystem.checkPowerAvailability(powerId);
+    }
+
+    /**
+     * Get list of unlocked powers for this character
+     * @returns {Array} - Array of unlocked power objects
+     */
+    getUnlockedPowers() {
+        const gameManager = this.scene.plugins.get('GameManager');
+        if (!gameManager || !gameManager.getPowerSystem()) {
+            return [];
+        }
+
+        const powerSystem = gameManager.getPowerSystem();
+        return powerSystem.getUnlockedPowerList();
     }
 
     // Method for future interaction system

@@ -1,0 +1,114 @@
+{
+  "starting_area": {
+    "id": "starting_area",
+    "name": "Starting Meadow",
+    "description": "A peaceful meadow where your journey begins",
+    "dimensions": {
+      "width": 25,
+      "height": 19
+    },
+    "tileSize": 32,
+    "spawnPoint": {
+      "x": 12,
+      "y": 9
+    },
+    "connections": [
+      {
+        "direction": "north",
+        "position": { "x": 12, "y": 0 },
+        "targetMap": "forest_entrance",
+        "targetSpawn": { "x": 12, "y": 18 }
+      },
+      {
+        "direction": "east",
+        "position": { "x": 24, "y": 9 },
+        "targetMap": "village_outskirts",
+        "targetSpawn": { "x": 1, "y": 9 }
+      },
+      {
+        "direction": "south",
+        "position": { "x": 12, "y": 18 },
+        "targetMap": "cave_entrance",
+        "targetSpawn": { "x": 12, "y": 1 }
+      }
+    ],
+    "objects": [
+      {
+        "type": "chest",
+        "position": { "x": 5, "y": 5 },
+        "contents": ["potion", "coin"]
+      },
+      {
+        "type": "crystal",
+        "position": { "x": 18, "y": 12 },
+        "storyTrigger": "first_power_unlock"
+      }
+    ]
+  },
+  "forest_entrance": {
+    "id": "forest_entrance",
+    "name": "Forest Entrance",
+    "description": "The entrance to the mysterious forest",
+    "dimensions": {
+      "width": 25,
+      "height": 19
+    },
+    "tileSize": 32,
+    "spawnPoint": {
+      "x": 12,
+      "y": 18
+    },
+    "connections": [
+      {
+        "direction": "south",
+        "position": { "x": 12, "y": 18 },
+        "targetMap": "starting_area",
+        "targetSpawn": { "x": 12, "y": 1 }
+      }
+    ]
+  },
+  "village_outskirts": {
+    "id": "village_outskirts",
+    "name": "Village Outskirts",
+    "description": "The outskirts of a small village",
+    "dimensions": {
+      "width": 25,
+      "height": 19
+    },
+    "tileSize": 32,
+    "spawnPoint": {
+      "x": 1,
+      "y": 9
+    },
+    "connections": [
+      {
+        "direction": "west",
+        "position": { "x": 0, "y": 9 },
+        "targetMap": "starting_area",
+        "targetSpawn": { "x": 23, "y": 9 }
+      }
+    ]
+  },
+  "cave_entrance": {
+    "id": "cave_entrance",
+    "name": "Cave Entrance",
+    "description": "A dark cave entrance",
+    "dimensions": {
+      "width": 25,
+      "height": 19
+    },
+    "tileSize": 32,
+    "spawnPoint": {
+      "x": 12,
+      "y": 1
+    },
+    "connections": [
+      {
+        "direction": "north",
+        "position": { "x": 12, "y": 0 },
+        "targetMap": "starting_area",
+        "targetSpawn": { "x": 12, "y": 17 }
+      }
+    ]
+  }
+}

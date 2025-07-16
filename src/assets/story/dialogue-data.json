@@ -1,0 +1,137 @@
+{
+  "game_start": {
+    "id": "game_start",
+    "type": "dialogue",
+    "speaker": "Narrator",
+    "text": "Welcome to your adventure! You find yourself in a peaceful meadow, ready to begin your journey.",
+    "choices": [
+      {
+        "text": "Look around",
+        "nextEvent": "first_exploration"
+      },
+      {
+        "text": "Check your surroundings",
+        "nextEvent": "first_exploration"
+      }
+    ]
+  },
+  "first_exploration": {
+    "id": "first_exploration",
+    "type": "dialogue",
+    "speaker": "Narrator",
+    "text": "The meadow stretches before you. You notice a crystal glowing in the distance and what appears to be a chest nearby.",
+    "choices": [
+      {
+        "text": "Investigate the crystal",
+        "nextEvent": "crystal_discovery"
+      },
+      {
+        "text": "Open the chest",
+        "nextEvent": "chest_discovery"
+      },
+      {
+        "text": "Explore the area",
+        "nextEvent": null
+      }
+    ]
+  },
+  "crystal_discovery": {
+    "id": "crystal_discovery",
+    "type": "dialogue",
+    "speaker": "Narrator",
+    "text": "As you approach the crystal, it begins to glow brighter. You feel a strange energy emanating from it.",
+    "storyTrigger": "first_power_unlock",
+    "choices": [
+      {
+        "text": "Touch the crystal",
+        "nextEvent": "power_awakening"
+      },
+      {
+        "text": "Step back",
+        "nextEvent": null
+      }
+    ]
+  },
+  "power_awakening": {
+    "id": "power_awakening",
+    "type": "dialogue",
+    "speaker": "Narrator",
+    "text": "The crystal's energy flows through you! You have awakened the power of Telekinesis. You can now move objects with your mind.",
+    "powerUnlock": "telekinesis",
+    "choices": [
+      {
+        "text": "Amazing!",
+        "nextEvent": null
+      }
+    ]
+  },
+  "chest_discovery": {
+    "id": "chest_discovery",
+    "type": "dialogue",
+    "speaker": "Narrator",
+    "text": "You open the chest and find a health potion and some gold coins inside.",
+    "itemRewards": ["potion", "coin"],
+    "choices": [
+      {
+        "text": "Take the items",
+        "nextEvent": null
+      }
+    ]
+  },
+  "first_dialogue": {
+    "id": "first_dialogue",
+    "type": "dialogue",
+    "speaker": "Mysterious Voice",
+    "text": "Welcome, traveler. Your journey has just begun. There are many secrets to discover in this world.",
+    "choices": [
+      {
+        "text": "Who are you?",
+        "nextEvent": "voice_identity"
+      },
+      {
+        "text": "What secrets?",
+        "nextEvent": "secrets_hint"
+      }
+    ]
+  },
+  "voice_identity": {
+    "id": "voice_identity",
+    "type": "dialogue",
+    "speaker": "Mysterious Voice",
+    "text": "I am a guide, here to help you understand your growing powers. You will learn more as you progress.",
+    "choices": [
+      {
+        "text": "I understand",
+        "nextEvent": null
+      }
+    ]
+  },
+  "secrets_hint": {
+    "id": "secrets_hint",
+    "type": "dialogue",
+    "speaker": "Mysterious Voice",
+    "text": "Ancient powers lie dormant in this land. Crystals like the one you found will awaken abilities within you.",
+    "choices": [
+      {
+        "text": "Tell me more",
+        "nextEvent": "power_explanation"
+      },
+      {
+        "text": "I'll discover them myself",
+        "nextEvent": null
+      }
+    ]
+  },
+  "power_explanation": {
+    "id": "power_explanation",
+    "type": "dialogue",
+    "speaker": "Mysterious Voice",
+    "text": "Each power you gain will help you overcome different challenges. Use them wisely, and they will serve you well.",
+    "choices": [
+      {
+        "text": "Thank you for the guidance",
+        "nextEvent": null
+      }
+    ]
+  }
+}

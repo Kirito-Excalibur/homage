@@ -1,0 +1,399 @@
+{
+  "events": [
+    {
+      "id": "game_start",
+      "type": "dialogue",
+      "triggers": [],
+      "content": {
+        "text": "You awaken in a mysterious forest, unsure of how you arrived here. The air shimmers with an otherworldly energy.",
+        "speaker": "Narrator",
+        "nextEvent": "first_dialogue"
+      },
+      "effects": [
+        {
+          "type": "set_flag",
+          "flag": "game_started",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "first_dialogue",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "game_started",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "A voice echoes in your mind: 'Welcome, chosen one. Your journey begins now.'",
+        "speaker": "Mysterious Voice",
+        "nextEvent": "tutorial_start"
+      },
+      "effects": [
+        {
+          "type": "set_flag",
+          "flag": "first_dialogue_seen",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "tutorial_start",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "first_dialogue_seen",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "Use the arrow keys or WASD to move around. Explore your surroundings.",
+        "speaker": "Mysterious Voice",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "tutorial_checkpoint"
+        }
+      ]
+    },
+    {
+      "id": "first_power_unlock",
+      "type": "power_unlock",
+      "triggers": [
+        {
+          "type": "checkpoint_reached",
+          "checkpointId": "tutorial_checkpoint"
+        }
+      ],
+      "content": {
+        "text": "You feel a surge of energy coursing through you. You have unlocked the power of Telekinesis!",
+        "speaker": "Narrator",
+        "powerUnlock": "telekinesis",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "unlock_power",
+          "powerId": "telekinesis"
+        },
+        {
+          "type": "set_flag",
+          "flag": "tutorial_completed",
+          "value": true
+        },
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "first_power_acquired"
+        }
+      ]
+    },
+    {
+      "id": "story_branch_choice",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "power_unlocked",
+          "powerId": "telekinesis"
+        }
+      ],
+      "content": {
+        "text": "You come to a fork in the path. Which way will you go?",
+        "speaker": "Narrator",
+        "choices": [
+          {
+            "text": "Take the left path through the dark woods",
+            "nextEvent": "dark_path_chosen",
+            "effects": [
+              {
+                "type": "set_flag",
+                "flag": "chose_dark_path",
+                "value": true
+              }
+            ]
+          },
+          {
+            "text": "Take the right path toward the light",
+            "nextEvent": "light_path_chosen",
+            "effects": [
+              {
+                "type": "set_flag",
+                "flag": "chose_light_path",
+                "value": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "dark_path_chosen",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "chose_dark_path",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "The shadows seem to welcome you. You sense great power hidden in the darkness.",
+        "speaker": "Narrator",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "dark_path_checkpoint"
+        }
+      ]
+    },
+    {
+      "id": "light_path_chosen",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "chose_light_path",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "The warm light fills you with hope and determination. You feel protected by ancient guardians.",
+        "speaker": "Narrator",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "light_path_checkpoint"
+        }
+      ]
+    },
+    {
+      "id": "first_telekinesis_use",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "power_unlocked",
+          "powerId": "telekinesis"
+        }
+      ],
+      "content": {
+        "text": "As you focus your mind, objects around you begin to respond to your will. The power feels natural, as if it was always part of you.",
+        "speaker": "Narrator",
+        "nextEvent": "vision_power_unlock"
+      },
+      "effects": [
+        {
+          "type": "set_flag",
+          "flag": "first_power_used",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "vision_power_unlock",
+      "type": "power_unlock",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "first_power_used",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "Your eyes begin to glow with an inner light. You can now see things that were hidden from ordinary sight.",
+        "speaker": "Narrator",
+        "powerUnlock": "enhanced_vision",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "unlock_power",
+          "powerId": "enhanced_vision"
+        },
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "vision_acquired"
+        }
+      ]
+    },
+    {
+      "id": "first_vision_use",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "power_unlocked",
+          "powerId": "enhanced_vision"
+        }
+      ],
+      "content": {
+        "text": "With your enhanced vision, you perceive the true nature of this realm. Time itself seems malleable here.",
+        "speaker": "Narrator",
+        "nextEvent": "time_power_unlock"
+      },
+      "effects": [
+        {
+          "type": "set_flag",
+          "flag": "vision_power_used",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "time_power_unlock",
+      "type": "power_unlock",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "vision_power_used",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "You feel the flow of time bend around you. With concentration, you can slow the world to a crawl.",
+        "speaker": "Narrator",
+        "powerUnlock": "time_slow",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "unlock_power",
+          "powerId": "time_slow"
+        },
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "time_acquired"
+        }
+      ]
+    },
+    {
+      "id": "first_time_manipulation",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "power_unlocked",
+          "powerId": "time_slow"
+        }
+      ],
+      "content": {
+        "text": "As time bends to your will, you realize the boundaries between dimensions are weakening. You might be able to phase through solid matter.",
+        "speaker": "Narrator",
+        "nextEvent": "phase_power_unlock"
+      },
+      "effects": [
+        {
+          "type": "set_flag",
+          "flag": "time_power_used",
+          "value": true
+        }
+      ]
+    },
+    {
+      "id": "phase_power_unlock",
+      "type": "power_unlock",
+      "triggers": [
+        {
+          "type": "flag",
+          "flag": "time_power_used",
+          "value": true
+        }
+      ],
+      "content": {
+        "text": "Your body shimmers with ethereal energy. You can now phase through certain obstacles, becoming one with the dimensional fabric.",
+        "speaker": "Narrator",
+        "powerUnlock": "phase_walk",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "unlock_power",
+          "powerId": "phase_walk"
+        },
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "phase_acquired"
+        }
+      ]
+    },
+    {
+      "id": "first_phase_walk",
+      "type": "dialogue",
+      "triggers": [
+        {
+          "type": "power_unlocked",
+          "powerId": "phase_walk"
+        }
+      ],
+      "content": {
+        "text": "You have mastered the fundamental powers of this realm. Your journey into greater mysteries can now truly begin.",
+        "speaker": "Narrator",
+        "nextEvent": null
+      },
+      "effects": [
+        {
+          "type": "set_flag",
+          "flag": "all_basic_powers_acquired",
+          "value": true
+        },
+        {
+          "type": "set_checkpoint",
+          "checkpointId": "power_master"
+        }
+      ]
+    }
+  ],
+  "checkpoints": {
+    "game_start": {
+      "id": "game_start",
+      "name": "The Awakening",
+      "description": "The beginning of your mysterious journey"
+    },
+    "tutorial_checkpoint": {
+      "id": "tutorial_checkpoint",
+      "name": "First Steps",
+      "description": "Learning to navigate the world"
+    },
+    "first_power_acquired": {
+      "id": "first_power_acquired",
+      "name": "Power Awakens",
+      "description": "Your first supernatural ability manifests"
+    },
+    "dark_path_checkpoint": {
+      "id": "dark_path_checkpoint",
+      "name": "Into the Shadows",
+      "description": "You have chosen the path of darkness"
+    },
+    "light_path_checkpoint": {
+      "id": "light_path_checkpoint",
+      "name": "Toward the Light",
+      "description": "You have chosen the path of light"
+    },
+    "vision_acquired": {
+      "id": "vision_acquired",
+      "name": "Eyes of Truth",
+      "description": "Your enhanced vision reveals hidden secrets"
+    },
+    "time_acquired": {
+      "id": "time_acquired",
+      "name": "Master of Time",
+      "description": "You can bend time to your will"
+    },
+    "phase_acquired": {
+      "id": "phase_acquired",
+      "name": "Dimensional Walker",
+      "description": "You can phase through the barriers of reality"
+    },
+    "power_master": {
+      "id": "power_master",
+      "name": "Power Master",
+      "description": "You have mastered the fundamental powers of this realm"
+    }
+  }
+}
