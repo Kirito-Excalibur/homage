@@ -51,7 +51,7 @@
 </data>
  </layer>
  <objectgroup id="3" name="Portal">
-  <object id="2" x="352.227" y="320.523" width="31.7273" height="31.5909"/>
+  <object id="2" name="alertZone" x="352.227" y="320.523" width="31.7273" height="31.5909"/>
  </objectgroup>
  <objectgroup id="5" name="gate">
   <object id="16" name="gateImg" gid="401" x="309.939" y="268.5" width="107.561" height="112.628"/>
