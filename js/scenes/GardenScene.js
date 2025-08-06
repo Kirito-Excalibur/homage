@@ -41,8 +41,7 @@ export class GardenScene extends Phaser.Scene {
       this.physics.add.collider(this.player.sprite, GrassLayer);
     }
 
-    // Create exit zone (top of the map to return to flooring)
-    this.exitZone = MapLoader.createExitZone(this, this.map);
+    // No exit zone needed - will check screen bounds directly
 
     // Setup UI
     this.ui = new UI(this);
@@ -72,14 +71,10 @@ export class GardenScene extends Phaser.Scene {
   }
 
   checkExit() {
-    if (!this.exitZone) return;
+    // Check if player's physics body (red boundary) is close to the top
+    const playerAtTop = this.player.body.y <= 20;
 
-    const playerInExitZone = this.exitZone.contains(
-      this.player.x + this.player.width / 2,
-      this.player.y + this.player.height / 2
-    );
-
-    if (playerInExitZone && !this.exitTriggered) {
+    if (playerAtTop && !this.exitTriggered) {
       // Return to GameScene
       this.scene.start(SCENE_KEYS.GAME, {
         playerX: 390,
@@ -88,7 +83,7 @@ export class GardenScene extends Phaser.Scene {
         health: this.health
       });
       this.exitTriggered = true;
-    } else if (!playerInExitZone && this.exitTriggered) {
+    } else if (!playerAtTop && this.exitTriggered) {
       this.exitTriggered = false;
     }
   }
